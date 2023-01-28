@@ -63,6 +63,12 @@ input {
     cursor: pointer;
   }
 }
+.button:disabled {
+  background-color: #82cfcd;
+  &:hover {
+    cursor:not-allowed;
+  }
+}
 
 .wallet {
   display: flex;
@@ -78,9 +84,22 @@ input {
     padding: 0.75rem;
     background-color: #f4f6f8;
   }
+  .public-key {
+    color: #A2A7A5;
+    font-size: 18px;
+    width: 90px;
+    display: flex;
+    margin-top: 12px;
+  }
 }
 
 .transfer {
   display: flex;
   flex-direction: column;
+}
+.error-message {
+  color: red;
+  padding-top: 8px;
+  letter-spacing: 0px;
+  padding-left: 8px;
 }

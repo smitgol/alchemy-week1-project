@@ -1,7 +1,10 @@
 import { useState } from "react";
 import server from "./server";
+import { keccak256 } from "ethereum-cryptography/keccak";
+import {toHex, utf8ToBytes} from "ethereum-cryptography/utils";
+import { sign, verify } from "ethereum-cryptography/secp256k1"
 
-function Transfer({ address, setBalance }) {
+function Transfer({ address, setBalance, privateKey }) {
   const [sendAmount, setSendAmount] = useState("");
   const [recipient, setRecipient] = useState("");
 
@@ -9,7 +12,7 @@ function Transfer({ address, setBalance }) {
 
   async function transfer(evt) {
     evt.preventDefault();
-
+    let { signature, messageHash } = await signTranscation(sendAmount, address, privateKey)
     try {
       const {
         data: { balance },
@@ -17,11 +20,21 @@ function Transfer({ address, setBalance }) {
         sender: address,
         amount: parseInt(sendAmount),
         recipient,
+        messageHash,
+        signature,
+        
       });
       setBalance(balance);
+      alert("amount transfered")
     } catch (ex) {
       alert(ex.response.data.message);
     }
+  }
+  async function signTranscation(amount, publicKey, privateKey) {
+    const message_string = JSON.stringify({amount:amount, publicKey: publicKey})
+    const messageHash = toHex(keccak256(utf8ToBytes(message_string)));
+    let signature = await sign(messageHash, privateKey);
+    return { signature:toHex(signature), messageHash};
   }
 
   return (
@@ -45,8 +58,8 @@ function Transfer({ address, setBalance }) {
           onChange={setValue(setRecipient)}
         ></input>
       </label>
-
-      <input type="submit" className="button" value="Transfer" />
+      
+      <input type="submit" className="button" value="Transfer" disabled={sendAmount=="" || address=="" || recipient==""}/>
     </form>
   );
 }
